@@ -13,28 +13,96 @@ app.use(function(req, res, next) {
 
 const agreements = [
   {
-    id: 0,
-    content: 'bonjour'
+    id: '0',
+    content: 'bonjour',
+    users: [
+      {
+        id: '0',
+        name: 'Adrien'
+      },
+      {
+        id: '1',
+        name: 'Adrien2'
+      }
+    ]
   },
   {
-    id: 1,
-    content: 'salut'
+    id: '1',
+    content: 'salut',
+    users: [
+      {
+        id: '2',
+        name: 'Adrien3'
+      }
+    ]
+  },
+  {
+    id: '2',
+    content: 'yo',
+    users: [
+      {
+        id: '0',
+        name: 'Adrien'
+      }
+    ]
   }
 ];
 
 const users = [
   {
-    id: 0,
-    name: 'Adrien'
+    id: '0',
+    name: 'Adrien',
+    agreements: [
+      {
+        id: '0',
+        content: 'bonjour'
+      },
+      {
+        id: '2',
+        content: 'yo'
+      }
+    ]
+  },
+  {
+    id: '1',
+    name: 'Adrien2',
+    agreements: [
+      {
+        id: '0',
+        content: 'bonjour'
+      }
+    ]
+  },
+  {
+    id: '2',
+    name: 'Adrien3',
+    agreements: [
+      {
+        id: '1',
+        content: 'salut'
+      }
+    ]
   }
 ];
 
-var agreementSerializer = new JSONAPISerializer('agreements', {
-  attributes: ['content', 'id']
+var agreementSerializer = new JSONAPISerializer('agreement', {
+  attributes: ['content', 'users'],
+  users: {
+    ref: 'id',
+    attributes: ['name']
+  }
+});
+
+var userSerializer = new JSONAPISerializer('user', {
+  attributes: ['name', 'agreements'],
+  agreements: {
+    ref: 'id',
+    included: false,
+    attributes: ['content']
+  }
 });
 
 app.get('/agreements', (req, res) => {
-  console.log('ping');
   res.send(agreementSerializer.serialize(agreements));
 });
 
@@ -44,6 +112,12 @@ app.get('/agreements/:id', (req, res) => {
   );
 });
 
-app.get('/agreements/:id/users', (req, res) => {});
+app.get('/users', (req, res) => {
+  res.send(userSerializer.serialize(users));
+});
+
+app.get('/users/:id', (req, res) => {
+  res.send(userSerializer.serialize(users[parseInt(req.params['id'])]));
+});
 
 app.listen(3000);
